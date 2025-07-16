@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>キャンバスの実験</title>
+  </head>
+  <body>
+    <style>
+	body {
+		margin: 0;
+		overflow: hidden;
+	}
+    </style>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    
+    <div id="logArea"></div>
+    <input type="button" value="button1" id="but1" onclick="button1()">
+    <input type="button" value="button2" id="but2" onclick="button2()">
+    <input type="text" placeholder="input cmd" id="cmdId"></button>
+    <p id="text"></p>
+    <script type="module" defer>
+      let ctx, width, height, t = 0;
+      let animationId1 = null;
+      let cmd;
+
+      const canvas = document.getElementById("canvas");
+      const out1 = document.getElementById("logArea"); 
+      const inputBox = document.getElementById("cmdId");
+
+      document.getElementById("cmdId").addEventListener("keydown", (event) => {
+	      if (event.key === "Enter") {
+		cmd = event.target.value;
+		mainApp();
+	      }
+      });
+      const delete_el =  (el) => {
+	if (el){
+		el.remove();
+	}
+      };
+      function mainApp() {
+        const text = document.getElementById("text");
+	text.textContent = "input \"rozen\" or \"plane\"";
+        const canvas = document.getElementById("canvas");
+        if (canvas.getContext) {
+          ctx = canvas.getContext("2d");
+	  width = canvas.width;
+	  height = canvas.height;
+
+          ctx.fillStyle = "rgb(200 100 0)";
+          ctx.fillRect(10, 10, 50, 50);
+
+          ctx.fillStyle = "rgb(0 0 200 / 50%)";
+          ctx.fillRect(30, 30, 50, 50);
+	  if(cmd){
+		  import('./index.js').then(module => {
+		  	module.main(cmd);
+			delete_el(canvas);	
+			delete_el(out1);	
+		  })
+		  .catch(err => console.error("読み込みエラー", err));
+		  //document.body.appendChild(script);
+	  }
+        }
+      }
+      //クリアメゾット
+      const clear = () => {
+	if (ctx) ctx.clearRect(0, 0, width, height);
+      };
+      window.button1 = function (){
+	console.log("button was pushed");
+	  function draw() {
+    		ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+    		ctx.fillRect(0, 0, width, height);
+
+    	ctx.beginPath();
+    	let cx = width / 2;
+    	let cy = height / 2;
+    	let r = 50 + Math.sin(t * 0.1) * 40;
+    	let points = 300;
+    	for (let i = 0; i < points; i++) {
+      		const angle = i / points * Math.PI * 2;
+      		const rad = r + Math.sin(i * 0.5 + t * 0.1) * 30;
+      		const x = cx + Math.cos(angle + t * 0.005) * rad;
+      		const y = cy + Math.sin(angle + t * 0.005) * rad;
+      		ctx.lineTo(x, y);
+    	}
+    		const hue = (t * 2) % 360;
+    		ctx.strokeStyle = `hsl(${hue}, 100%, 50%)`;
+    		ctx.lineWidth = 2;
+    		ctx.stroke();
+
+    		t++;
+    		animationId1 = requestAnimationFrame(draw);
+  	}
+	draw();
+      }
+      window.button2 = function (){
+      if(animationId1){
+	cancelAnimationFrame(animationId1);
+	animationId1 = null;
+	clear();
+      }
+	mainApp();
+      }
+      mainApp();
+    </script>
+  </body>
+</html>
